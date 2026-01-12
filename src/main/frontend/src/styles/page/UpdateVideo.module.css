@@ -1,0 +1,141 @@
+.updateBox{
+    width: 100%;
+    display: flex;
+}
+
+.dataSection{
+    width: 50%;
+    padding: 5px;
+}
+
+.itemBox{
+    width: 100%;
+    border: 2px solid #585858;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+
+}
+
+.errorItemBox{
+    width: 100%;
+    border: 2px solid red;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+
+}
+
+.itemBox:focus-within{
+    border: 2px solid white;
+}
+
+.itemBox:focus-within .textLength, .errorItemBox:focus-within .errorTextLength{
+    display: block;
+}
+
+.titleBox{
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+    color: white;
+    border: none;
+    resize: none;
+}
+
+.descriptionBox{
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    color: white;
+    border: none;
+    resize: none;
+}
+
+.stateBox{
+    width: 100%;
+    border: none;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.videoBox{
+    padding-top:56.25%;
+    position:relative;
+}
+
+.videoBox video{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    border-radius: 10px;
+    background-color: black;
+}
+
+.subject{
+    margin-top: 20px;
+}
+
+.thumbnailBox{
+    margin-top: 10px;
+    padding-top:56.25%;
+    position:relative;
+}
+
+.thumbnail{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    border: 0;
+    border-radius: 10px;
+    background-color: #282828;
+}
+
+.uploadText{
+    position:absolute;
+    top: calc(50% - 1em);
+    text-align: center;
+    width: 100%;
+}
+
+.btn{
+    margin: 5px;
+    float: right;
+    height: 30px;
+    border: none;
+    border-radius: 10px;
+    padding: 0px 5px;
+    background-color: #585858;
+    color: white;
+    min-width: 70px;
+}
+
+.btn:hover{
+    background-color: black;
+}
+
+.textLength{
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: right;
+    display: none;
+}
+
+.errorTextLength{
+    color: red;
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: right;
+    display: none;
+}
+
+.errorMsg{
+    color: red;
+    padding: 10px;
+}
+
+

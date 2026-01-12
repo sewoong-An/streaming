@@ -1,0 +1,14 @@
+.videoBox{
+    padding-top:56.25%;
+    position:relative;
+}
+
+.video{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    border-radius: 10px;
+    background-color: black;
+}

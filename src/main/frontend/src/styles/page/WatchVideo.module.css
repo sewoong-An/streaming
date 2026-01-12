@@ -1,0 +1,225 @@
+.contentsBox{
+    width: 100%;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.videoInfoBox{
+    width: 90%;
+}
+
+.videoBox{
+    width: 100%;
+}
+
+.titleBox{
+    width: 100%;
+    display: flex;
+}
+
+.videoTitle{
+    width: 95%;
+    margin: 10px 0px;
+    font-size: 1.5rem;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
+    border: none;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.addPlaylist{
+    background-color: #282828;
+    border-radius: 50px;
+    width: 80px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0px;
+    cursor: pointer;
+}
+
+.addPlaylist:hover{
+    background-color: #585858;
+}
+
+.iconAddPlaylist{
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+}
+
+.channelBox{
+    width: 100%;
+    padding: 10px 0px;
+    display: flex;
+}
+
+.channelInfoBox{
+    display: flex;
+    flex-direction: column;
+}
+
+.channelName{
+
+}
+
+.subscribeCount{
+    font-size: 0.9rem;
+    color: gray;
+}
+
+.detailBox{
+    background-color: #282828;
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.viewsAndDt{
+    padding-bottom: 10px;
+}
+
+.videoDescription{
+    overflow: hidden;
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: pre-wrap;
+    border: none;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.videoDescriptionAll{
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.more{
+    color: #686868;
+}
+
+.newCommentBox{
+    display: flex;
+}
+
+.newCommentBox, .commentsBox{
+    padding: 10px;
+    width: 90%;
+    position: relative;
+}
+
+.newCommentInfo{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.inputComment{
+    width: calc(100% - 55px);
+    resize: none;
+    min-height: 1em;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+    border: 0;
+    border-bottom: 2px solid #585858;
+    margin-top: 10px;
+}
+
+.inputComment:focus{
+    animation-name: border-focus;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes border-focus {
+    from {
+        border-bottom: 2px solid #5b5b5b;
+    }
+    to {
+        border-bottom: 2px solid #ffffff;
+    }
+}
+
+.addCommentBtn{
+    height: 2em;
+    /*width: 50px;*/
+    padding: 0px 10px;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    border: none;
+    background-color: #282828;
+    color: white;
+    border-radius: 50px;
+}
+
+.addCommentBtn:hover{
+    background-color: #585858;
+}
+
+.eachComment{
+    padding: 10px;
+    display: flex;
+}
+
+.commentInfo{
+    width: 90%;
+}
+
+.commentChannelName{
+    padding-right: 10px;
+    display: inline-block;
+}
+
+.channelImage{
+    background-color: dodgerblue;
+    width: 50px;
+    height: 50px;
+    border: none;
+    margin-right: 10px;
+    background-size: 100px 100px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.commentDt{
+    color: gray;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.commentContent{
+    padding-top: 10px;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    border: none;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.deleteBtn{
+    border: none;
+    border-radius: 10px;
+    width: 20px;
+    background-color: black;
+    cursor: pointer;
+}
+
+.deleteBtn:hover{
+    background-color: #282828;
+}

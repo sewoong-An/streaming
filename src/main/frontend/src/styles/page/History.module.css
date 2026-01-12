@@ -1,0 +1,16 @@
+.pageTitle{
+    display: inline;
+    font-size: 20px;
+    width: 100%;
+    padding: 10px;
+}
+
+.video{
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.date{
+    padding: 10px;
+}

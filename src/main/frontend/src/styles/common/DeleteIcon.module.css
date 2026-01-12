@@ -1,0 +1,19 @@
+.icon{
+    width: 3vw;
+    height: 3vw;
+    max-width: 15px;
+    max-height: 15px;
+    min-width: 10px;
+    min-height: 10px;
+    margin: 10px;
+}
+
+.box{
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -18px;
+}
+
+.box:hover{
+    background-color: #282828;
+}

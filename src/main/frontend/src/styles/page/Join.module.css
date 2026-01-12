@@ -1,0 +1,45 @@
+.join{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.joinBox {
+    width: 25vw;
+    height: 50vh;
+    padding: 30px;
+    margin-top: 20px;
+    min-width: 300px;
+}
+
+.elmBox{
+    margin-top: 20px;
+}
+
+.joinInput{
+    width: 100%;
+    height: 50px;
+    background-color: #282828;
+    padding: 10px 20px 10px 20px;
+    color: white;
+    border: none;
+}
+
+.joinBtn{
+    width: 100%;
+    height: 50px;
+    border: none;
+}
+
+.joinBtn:hover{
+    background-color: #282828;
+    color: white;
+}
+
+.errorMsg{
+    margin-top: 10px;
+    color: red;
+    font-size: 13px;
+}

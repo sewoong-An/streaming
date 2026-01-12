@@ -1,0 +1,112 @@
+.header{
+    width: 100vw;
+    height: 60px;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logoArea{
+    height: 50px;
+    width: 33%;
+    max-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo{
+    width: 100%;
+    height: 100%;
+}
+
+.searchArea{
+    height: 50px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.searchBox{
+    width: 50%;
+    height: 40px;
+    border: 2px solid #282828;
+    border-radius: 10px;
+    background-color: black;
+    padding-left: 10px;
+    display: flex;
+
+}
+
+.searchInput{
+    width: calc(100% - 50px);
+    height: 100%;
+    border: none;
+    background-color: black;
+    color: white;
+}
+
+.searchBtn{
+    width: 40px;
+    height: 100%;
+    border: none;
+    background-color: black;
+}
+
+.searchInput:focus{
+    outline: none;
+}
+
+.accountArea{
+    height: 50px;
+    width: 33%;
+    max-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logoutIcon{
+    width: 25px;
+    height: 25px;
+}
+
+.searchBar{
+    width: 100vw;
+    height: 60px;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 9999;
+    background-color: black;
+}
+
+.searchBarInputBox{
+    width: 100%;
+}
+
+.searchBarInput{
+    width: calc(100% - 50px);
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background-color: #282828;
+    color: white;
+    padding: 0px 10px;
+}
+
+.searchBarBtn{
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: black;
+    cursor: pointer;
+}
+
+.searchBarBtn img{
+    width: 30px;
+    height: 30px;
+}

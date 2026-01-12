@@ -1,0 +1,36 @@
+.footer{
+    height: 60px;
+    width: 100vw;
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    border: 1px solid #282828;
+    z-index: 9999;
+}
+
+.eachMenu{
+    width: 20vw;
+    display:flex;
+    flex-direction: column;
+    background-color: black;
+    align-items: center;
+    padding: 10px;
+}
+
+.activeEachMenu{
+    width: 20vw;
+    display:flex;
+    flex-direction: column;
+    background-color: #282828;
+    align-items: center;
+    padding: 10px;
+}
+
+.icon{
+    width: 30px;
+    height: 30px;
+}
+
+.menuName{
+    font-size: 0.8rem;
+}

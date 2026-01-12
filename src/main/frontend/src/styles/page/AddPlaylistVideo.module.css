@@ -1,0 +1,23 @@
+.playlistBox{
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.playlistBox:hover{
+    background-color: #585858;
+}
+
+.title{
+    width: 100%;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    border: none;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+

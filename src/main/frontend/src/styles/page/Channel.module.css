@@ -1,0 +1,69 @@
+.channelBox{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #282828;
+    padding-bottom: 20px;
+}
+
+.channelImg{
+    width: 100px;
+    height: 100px;
+    border: none;
+    margin-right: 10px;
+    background-size: 100px 100px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.channelInfo{
+    width: 80%;
+}
+
+.channelName{
+    font-size: 25px;
+    padding: 10px;
+}
+
+.subCnt{
+    padding: 0px 10px 10px 10px;
+    color: #585858;
+}
+
+.subBtn{
+    width: 100px;
+    height: 40px;
+    border: 1px solid white;
+    border-radius: 9999px;
+    background-color: black;
+    color: white;
+}
+
+.subBtn:hover{
+    background-color: gray;
+}
+
+.tabBox{
+    border-bottom: 1px solid #282828;
+}
+
+.tab{
+    width: 100px;
+    height: 50px;
+    border: none;
+    background-color: transparent;
+    color: #585858;
+}
+
+.tab:hover{
+    color: white;
+}
+
+.tabActive{
+    width: 100px;
+    height: 50px;
+    border: none;
+    background-color: transparent;
+    color: white;
+    border-bottom: 2px solid #585858;
+}

@@ -1,0 +1,95 @@
+.video, .noHvVideo{
+    background-color: black;
+    color: white;
+    cursor: pointer;
+}
+
+.video:hover{
+    transform:scale(1.1);
+    transition: .5s;
+}
+
+.videoImg{
+    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.videoHeader{
+    text-align: right;
+    position: relative;
+    padding-top: 56.25%;
+}
+
+.videoBody{
+    height: 120px;
+    display: flex;
+    padding-top: 20px;
+}
+
+.channelImg{
+    background-color: dodgerblue;
+    width: 50px;
+    height: 50px;
+    border: none;
+    margin-right: 10px;
+    background-size: 100px 100px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.videoInfo{
+    width: calc(100% - 60px);
+    display: inline-block;
+    height: 50px;
+}
+
+.noChVideoInfo{
+    width: 100%;
+    display: inline-block;
+    height: 50px;
+}
+
+.videoTitle{
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    white-space: normal;
+    border: none;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+.channelName{
+    color: gray;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline;
+}
+
+.channelName:hover{
+    color: lightgray;
+}
+
+.viewsAndDt{
+    color: gray;
+    font-size: 12px;
+}
+
+.runningTime{
+    background-color: rgba(0,0,0,.5);
+    font-size: .6rem;
+    position: absolute;
+    display: inline;
+    border-radius: .2rem;
+    padding: 0 .2rem;
+    bottom: 0;
+    right: 0;
+    margin: .2rem;
+}
+
