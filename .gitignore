@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+file/channel/
+file/thumbnail/
+file/video/
