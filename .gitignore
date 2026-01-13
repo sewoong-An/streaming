@@ -37,8 +37,8 @@ out/
 .vscode/
 
 
-file/channel/
-file/thumbnail/
-file/video/
+file/channel/*
+file/thumbnail/*
+file/video/*
 /node_modules/
-/src/main/resources/static/
+/src/main/resources/static/*
