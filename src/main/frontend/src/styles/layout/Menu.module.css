@@ -21,3 +21,17 @@
     padding: 10px;
 }
 
+
+
+.menu::-webkit-scrollbar {
+    width: 10px;  
+}
+
+.menu.scrollbar::-webkit-scrollbar-track {
+    background: transparent;  /*스크롤바 뒷 배경 색상*/
+}
+.menu::-webkit-scrollbar-thumb {
+    background: gray; /* 스크롤바 색상 */
+    border-radius: 10px; /* 스크롤바 둥근 테두리 */
+}
+

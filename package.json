@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "react-cookie": "^8.0.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }
