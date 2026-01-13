@@ -1,23 +1,39 @@
-package com.sewoong.streaming.controller;
+package com.sewoong.streaming.service;
 
-import lombok.RequiredArgsConstructor;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import javax.imageio.ImageIO;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import ws.schild.jave.Encoder;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.encode.AudioAttributes;
+import ws.schild.jave.encode.EncodingAttributes;
+import ws.schild.jave.encode.VideoAttributes;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.*;
 
-@RestController
-@RequestMapping("/api/file")
-@RequiredArgsConstructor
-public class FileController {
-    
+@Service
+public class FileService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Value("${cloud.aws.s3.bucket}")
@@ -29,8 +45,13 @@ public class FileController {
     @Value("${file.path}")
     private String tempPath;
 
-    
+    @Value("${file.ffprobe.path}")
+    private String ffmpegPath;
 
+    private SimpMessagingTemplate messagingTemplate;
+
+    private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
+    
     public String videoUpload(MultipartFile file) {
         try {
 
@@ -199,4 +220,71 @@ public class FileController {
         }
     }
 
+    public SseEmitter sseConnect(String sseId) {
+        SseEmitter emitter = new SseEmitter(60 * 1000L * 10); // 10분 타임아웃
+        emitters.put(sseId, emitter);
+
+        emitter.onCompletion(() -> emitters.remove(sseId));
+        emitter.onTimeout(() -> emitters.remove(sseId));
+
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("connect") // 이벤트 이름
+                    .data("connected!")); // 데이터 내용
+        } catch (IOException e) {
+            emitters.remove(sseId);
+        }
+        return emitter;
+    }
+
+    private void sendToClient(String sseId, Object data) {
+        SseEmitter emitter = emitters.get(sseId);
+        if (emitter != null) {
+            try {
+                emitter.send(SseEmitter.event().name("progress").data(data));
+            } catch (IOException e) {
+                emitters.remove(sseId);
+            }
+        }
+    }
+
+    public void saveAsAv1(String inputPath, String sseId) {
+        try {
+
+            UUID uuid = UUID.randomUUID();
+            String extension = inputPath.substring(inputPath.lastIndexOf(".") + 1);
+            String outputPath = "/video/" + uuid + "." + extension;
+
+            // 설치된 FFmpeg 경로 지정
+            FFmpeg ffmpeg = new FFmpeg("C:/ffmpeg/bin/ffmpeg"); 
+            FFprobe ffprobe = new FFprobe("C:/ffmpeg/bin/ffprobe");
+
+            double durationNs = ffprobe.probe(tempPath + inputPath).format.duration * 1_000_000_000.0;
+
+            FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(tempPath + inputPath)
+                .overrideOutputFiles(true)
+                .addOutput(tempPath + outputPath)
+                    .setVideoCodec("libsvtav1") // AV1 코덱 지정
+                    .setVideoResolution(1920, 1080)
+                    .setVideoFrameRate(30, 1)
+                    .addExtraArgs("-preset", "10") // SVT-AV1 전용 프리셋 (0~13, 높을수록 빠름)
+                    .addExtraArgs("-crf", "35")   // 화질 설정 (낮을수록 고화질)
+                .done();
+
+            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
+            executor.createJob(builder, progress -> {
+                double percentage = Math.min(100.0, (progress.out_time_ns / durationNs) * 100);
+
+                // SSE로 데이터 전송
+                sendToClient(sseId, Map.of("percent", Math.round(percentage), "status", "ENCODING"));
+                
+            }).run();
+
+            sendToClient(sseId, Map.of("percent", 100, "status", "COMPLETE"));
+
+        } catch (Exception e) {
+            throw new RuntimeException("비디오 인코딩 실패", e);
+        }
+    }
 }

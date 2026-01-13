@@ -1,4 +1,4 @@
-package com.sewoong.streaming.controller;
+package com.sewoong.streaming.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -35,12 +33,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
 
-import lombok.RequiredArgsConstructor;
-
-@RestController
-@RequestMapping("/api/s3/file")
-@RequiredArgsConstructor
-public class S3FileController {
+public class S3FileService {
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Value("${cloud.aws.s3.bucket}")
@@ -52,7 +45,7 @@ public class S3FileController {
     @Value("${file.path}")
     private String tempPath;
 
-    private final AmazonS3Client amazonS3Client;
+    private AmazonS3Client amazonS3Client;
 
     public String fileUploadByS3(MultipartFile file) {
         try {

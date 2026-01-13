@@ -1,10 +1,9 @@
 package com.sewoong.streaming.controller;
 
-import com.sewoong.streaming.domain.Member;
-import com.sewoong.streaming.domain.Video;
 import com.sewoong.streaming.dto.ChannelDto;
 import com.sewoong.streaming.dto.MemberLoginRequestDto;
 import com.sewoong.streaming.security.TokenInfo;
+import com.sewoong.streaming.service.FileService;
 import com.sewoong.streaming.service.MemberService;
 import com.sewoong.streaming.service.SubscribeService;
 import lombok.RequiredArgsConstructor;
@@ -12,20 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -42,7 +37,8 @@ public class MemberController {
     private final SubscribeService subscribeService;
 
     @Autowired
-    private final FileController fileController;
+    private final FileService fileService;
+
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
         JSONObject resJobj = new JSONObject();
@@ -88,7 +84,7 @@ public class MemberController {
 
         JSONObject resJobj = new JSONObject();
         try {
-            String imageUrl = fileController.createBasicChannelImage((String) data.get("name"));
+            String imageUrl = fileService.createBasicChannelImage((String) data.get("name"));
 
             Integer memberCode = memberService.join(data, imageUrl);
             resJobj.put("status", "SUCCESS");
@@ -124,7 +120,7 @@ public class MemberController {
         JSONObject resJobj = new JSONObject();
 
         try {
-            String ImageUrl = fileController.channelImageUpload(file, origin);
+            String ImageUrl = fileService.channelImageUpload(file, origin);
             if (ImageUrl.equals("")) {
                 resJobj.put("status", "ERROR");
                 return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);

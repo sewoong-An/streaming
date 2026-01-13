@@ -48,7 +48,16 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.345'
 	implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
-    implementation group: 'net.bramp.ffmpeg', name: 'ffmpeg', version: '0.6.2'
+    implementation 'net.bramp.ffmpeg:ffmpeg:0.8.0'
+
+	// JAVE2 코어 라이브러리
+    implementation 'ws.schild:jave-core:3.3.1'    
+    // 실행 환경에 맞는 FFmpeg 바이너리 선택 (모든 OS 포함 시 jave-all-deps 사용)
+    implementation 'ws.schild:jave-all-deps:3.3.1'
+    // 비동기 처리를 위한 의존성 (필요 시)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+	
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {

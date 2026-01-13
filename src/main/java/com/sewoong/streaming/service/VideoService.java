@@ -8,9 +8,7 @@ import com.sewoong.streaming.dto.VideoDto;
 import com.sewoong.streaming.repository.MemberRepository;
 import com.sewoong.streaming.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
-import net.bramp.ffmpeg.FFprobe;
-import net.bramp.ffmpeg.probe.FFmpegFormat;
-import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

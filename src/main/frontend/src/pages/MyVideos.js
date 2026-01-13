@@ -89,7 +89,7 @@ function MyVideos() {
     <div className={styles.videoList}>
       <div className={styles.uploadBox}>
         <div className={styles.pageTitle}>동영상 관리</div>
-        <button className={styles.uploadBtn} onClick={noUpload}>
+        <button className={styles.uploadBtn} onClick={openModal}>
           동영상 업로드
         </button>
         <Modal

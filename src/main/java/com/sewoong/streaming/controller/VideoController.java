@@ -3,6 +3,7 @@ package com.sewoong.streaming.controller;
 import com.sewoong.streaming.domain.Subscribe;
 
 import com.sewoong.streaming.dto.VideoDto;
+import com.sewoong.streaming.service.FileService;
 import com.sewoong.streaming.service.SubscribeService;
 import com.sewoong.streaming.service.VideoService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +36,7 @@ public class VideoController {
     @Autowired
     private final VideoService videoService;
     @Autowired
-    private final FileController fileController;
+    private final FileService fileService;
     @Autowired
     private final SubscribeService subscribeService;
 
@@ -44,22 +46,27 @@ public class VideoController {
     @Value("${file.path}")
     private String tempPath;
 
+    @GetMapping(value = "/sseConnect/{sseId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter sseConnect(@PathVariable String sseId) {
+        return fileService.sseConnect(sseId);
+    }
+
 
     @PostMapping("/upload")
-    public ResponseEntity upload(@RequestParam("file")MultipartFile file, @RequestParam("key") String key){
+    public ResponseEntity upload(@RequestParam("file")MultipartFile file, @RequestParam("sseId") String sseId){
         JSONObject resJobj = new JSONObject();
 
         try {
-            // SseEmitter emitter = SSEController.getEmitter(key);
-            // String videoUrl = fileController.videoUploadProgress(file, emitter);
-            String videoUrl = fileController.videoUpload(file);
+            String videoUrl = fileService.videoUpload(file);
 
             if (videoUrl.equals("")) {
                 resJobj.put("status", "ERROR");
                 return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
             }
 
-            String thumbnailUrl = fileController.initialThumbnail(videoUrl);
+            fileService.saveAsAv1(videoUrl, sseId);
+
+            String thumbnailUrl = fileService.initialThumbnail(videoUrl);
 
             if (thumbnailUrl.equals("")) {
                 resJobj.put("status", "ERROR");
@@ -81,8 +88,6 @@ public class VideoController {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
             return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
-        }finally {
-            SSEController.deleteEmitter(key);
         }
     }
 
@@ -91,7 +96,7 @@ public class VideoController {
         JSONObject resJobj = new JSONObject();
 
         try {
-            String thumbnailUrl = fileController.thumbnailUpload(file, origin);
+            String thumbnailUrl = fileService.thumbnailUpload(file, origin);
             if (thumbnailUrl.equals("")) {
                 resJobj.put("status", "ERROR");
                 return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
