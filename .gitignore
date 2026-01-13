@@ -40,3 +40,7 @@ out/
 file/channel/
 file/thumbnail/
 file/video/
+node_modules/
+src/main/resources/static/static/
+src/main/resources/static/asset-manifest.json
+node_modules/.package-lock.json
