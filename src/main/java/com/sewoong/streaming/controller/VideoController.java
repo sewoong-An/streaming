@@ -57,28 +57,28 @@ public class VideoController {
         JSONObject resJobj = new JSONObject();
 
         try {
-            String videoUrl = fileService.videoUpload(file);
+            String originVideoPath = fileService.videoUpload(file);
 
-            if (videoUrl.equals("")) {
+            if (originVideoPath.equals("")) {
                 resJobj.put("status", "ERROR");
                 return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
             }
 
-            fileService.saveAsAv1(videoUrl, sseId);
+            String videoPath = fileService.saveAsAv1(originVideoPath, sseId);
 
-            String thumbnailUrl = fileService.initialThumbnail(videoUrl);
+            String thumbnailPath = fileService.initialThumbnail(videoPath);
 
-            if (thumbnailUrl.equals("")) {
+            if (thumbnailPath.equals("")) {
                 resJobj.put("status", "ERROR");
                 return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
             }
 
             FFprobe ffprobe = new FFprobe(ffprobePath);  //리눅스에 설치되어 있는 ffmpeg 폴더
-            FFmpegProbeResult probeResult = ffprobe.probe(tempPath + videoUrl);
+            FFmpegProbeResult probeResult = ffprobe.probe(tempPath + videoPath);
             FFmpegFormat format = probeResult.getFormat();
             Integer runningTime = (int) format.duration;
 
-            Integer videoId = videoService.createVideo(videoUrl, thumbnailUrl, runningTime);
+            Integer videoId = videoService.createVideo(videoPath, thumbnailPath, runningTime);
             resJobj.put("status", "SUCCESS");
             resJobj.put("videoId", videoId);
             return new ResponseEntity(resJobj, HttpStatus.OK);

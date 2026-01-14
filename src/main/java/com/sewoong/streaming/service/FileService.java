@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -23,11 +27,6 @@ import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
-import ws.schild.jave.Encoder;
-import ws.schild.jave.MultimediaObject;
-import ws.schild.jave.encode.AudioAttributes;
-import ws.schild.jave.encode.EncodingAttributes;
-import ws.schild.jave.encode.VideoAttributes;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -101,35 +100,39 @@ public class FileService {
         UUID uuid = UUID.randomUUID();
 
         String thumbnailUrl = "/thumbnail/" + uuid + ".png";
-//      String fileUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + uploadKey;
 
-        Runtime run = Runtime.getRuntime();
-        String command = "ffmpeg -i " + tempPath + videoUrl + " -ss 00:00:01 -vcodec png -vframes 1 -vf scale=320:180 " + tempPath + thumbnailUrl; // 동영상 1초에서 Thumbnail 추출
-        System.out.println(command);
+        // 명령어를 리스트 형태로 전달 (공백 포함 경로 대응)
+        List<String> command = Arrays.asList(
+            "ffmpeg", "-i", tempPath + videoUrl,
+            "-ss", "00:00:01",
+            "-vcodec", "png",
+            "-vframes", "1",
+            "-vf", "scale=320:180",
+            tempPath + thumbnailUrl
+        );
 
-        Process p = run.exec(command);
+        ProcessBuilder pb = new ProcessBuilder(command);
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        // 중요: 에러 스트림을 표준 출력 스트림으로 합침
+        pb.redirectErrorStream(true); 
 
-        String line = null;
+        Process p = pb.start();
 
-        while((line = br.readLine()) != null){
-            System.out.println(line);
+        // 이제 하나의 InputStream으로 ffmpeg의 모든 출력(로그+에러)을 읽을 수 있음
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println("FFMPEG LOG: " + line);
+            }
         }
 
-        // File file = new File(tempPath + "/thumbnail/" + uuid + ".png");
-        // InputStream thumbnailStream = new FileInputStream(file);
-
-        // ObjectMetadata metadata = new ObjectMetadata();
-        // metadata.setContentType("image/png");
-        // metadata.setContentLength(file.length());
-        // amazonS3Client.putObject(bucket, uploadKey, thumbnailStream, metadata);
-
-        // String fileUrl = amazonS3Client.getUrl(bucket, uploadKey).toString();
-
-        // String deleteCommand = "rm " + tempPath + "/" + uuid + ".png";
-        // System.out.println(deleteCommand);
-        // run.exec(deleteCommand);
+        // 프로세스 종료 대기 및 결과 확인
+        int exitCode = p.waitFor();
+        if (exitCode == 0) {
+            System.out.println("썸네일 생성 성공");
+        } else {
+            System.out.println("ffmpeg 종료 코드: " + exitCode);
+        }
 
         return thumbnailUrl;
     }
@@ -248,7 +251,7 @@ public class FileService {
         }
     }
 
-    public void saveAsAv1(String inputPath, String sseId) {
+    public String saveAsAv1(String inputPath, String sseId) {
         try {
 
             UUID uuid = UUID.randomUUID();
@@ -265,11 +268,20 @@ public class FileService {
                 .setInput(tempPath + inputPath)
                 .overrideOutputFiles(true)
                 .addOutput(tempPath + outputPath)
-                    .setVideoCodec("libsvtav1") // AV1 코덱 지정
+                    .setVideoCodec("libsvtav1") 
                     .setVideoResolution(1920, 1080)
                     .setVideoFrameRate(30, 1)
-                    .addExtraArgs("-preset", "10") // SVT-AV1 전용 프리셋 (0~13, 높을수록 빠름)
-                    .addExtraArgs("-crf", "35")   // 화질 설정 (낮을수록 고화질)
+                    // 키프레임 간격 설정 (GOP): 탐색 속도 개선
+                    // 30fps 기준 60으로 설정하면 약 2초마다 이동 지점 생성
+                    .addExtraArgs("-g", "60") 
+                    
+                    // FastStart 설정: 웹 스트리밍 시 즉시 탐색 가능하게 함
+                    .addExtraArgs("-movflags", "+faststart")
+
+                    .addExtraArgs("-preset", "10") 
+                    .addExtraArgs("-crf", "35")   
+                    // SVT-AV1 전용 파라미터로 키프레임 거리 강제 (선택 사항)
+                    .addExtraArgs("-svtav1-params", "keyint=60")
                 .done();
 
             FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
@@ -283,6 +295,12 @@ public class FileService {
 
             sendToClient(sseId, Map.of("percent", 100, "status", "COMPLETE"));
 
+            //인코딩 하기전 동영상 삭제
+            Path filePath = Paths.get(tempPath + inputPath);
+            Files.delete(filePath);
+            System.out.println("원본 파일 삭제 성공");
+
+            return outputPath;
         } catch (Exception e) {
             throw new RuntimeException("비디오 인코딩 실패", e);
         }

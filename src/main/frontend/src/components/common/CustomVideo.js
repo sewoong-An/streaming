@@ -26,14 +26,13 @@ function CustomVideo({ videoUrl, thumbnailUrl }) {
         key={videoUrl}
         src={videoUrl}
         controls
-        controlsList={"nodownload"}
+        controlsList="nodownload"
         playsInline={true}
+        crossOrigin="anonymous" // CORS 요청 시 Range 헤더 전송을 원활하게 함
         onCanPlay={playVideo}
-        onplay
         onVolumeChange={changeVolume}
-        poster={
-          thumbnailUrl != null && thumbnailUrl != "" ? thumbnailUrl : null
-        }
+        poster={thumbnailUrl || null}
+        preload="metadata"
       ></video>
     </div>
   );
