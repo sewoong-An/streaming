@@ -7,7 +7,6 @@
     height: 70px;
     display: flex;
     align-items: center;
-    position: sticky;
     top: -21px;
     background-color: black;
     z-index:10;
@@ -41,7 +40,6 @@
 }
 
 .videoTable thead{
-    position: sticky;
     top: 84.5px;
     background-color: black;
     z-index:8;
@@ -53,7 +51,6 @@
 
 
 .videoTable tbody{
-    overflow-y: scroll;
 }
 
 .videoTable th{
@@ -150,7 +147,6 @@ input[type="checkbox"] {
 .selectAction{
     width: 100%;
     padding: 5px;
-    position: sticky;
     top: 49px;
     z-index: 9;
     background-color: black;
