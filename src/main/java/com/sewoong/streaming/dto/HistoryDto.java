@@ -1,7 +1,6 @@
 package com.sewoong.streaming.dto;
 
 import com.sewoong.streaming.domain.History;
-import com.sewoong.streaming.domain.Member;
 import lombok.Data;
 
 @Data

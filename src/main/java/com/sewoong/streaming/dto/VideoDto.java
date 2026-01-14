@@ -2,7 +2,6 @@ package com.sewoong.streaming.dto;
 
 import com.sewoong.streaming.domain.Video;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class VideoDto {

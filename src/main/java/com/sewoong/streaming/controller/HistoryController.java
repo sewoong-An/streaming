@@ -1,11 +1,9 @@
 package com.sewoong.streaming.controller;
 
-import com.sewoong.streaming.domain.History;
 import com.sewoong.streaming.dto.HistoryDto;
 import com.sewoong.streaming.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

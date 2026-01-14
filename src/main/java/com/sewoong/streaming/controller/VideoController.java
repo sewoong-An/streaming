@@ -25,7 +25,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -78,7 +77,7 @@ public class VideoController {
             FFmpegFormat format = probeResult.getFormat();
             Integer runningTime = (int) format.duration;
 
-            Integer videoId = videoService.createVideo(videoPath, thumbnailPath, runningTime);
+            Integer videoId = videoService.insertVideo(videoPath, thumbnailPath, runningTime);
             resJobj.put("status", "SUCCESS");
             resJobj.put("videoId", videoId);
             return new ResponseEntity(resJobj, HttpStatus.OK);

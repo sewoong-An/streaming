@@ -1,59 +1,28 @@
 package com.sewoong.streaming.service;
 
-import com.sewoong.streaming.domain.Comment;
-import com.sewoong.streaming.domain.Member;
-import com.sewoong.streaming.dto.CommentDto;
-import com.sewoong.streaming.dto.UserCustom;
-import com.sewoong.streaming.repository.CommentRepository;
-import com.sewoong.streaming.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
+import com.sewoong.streaming.dto.CommentDto;
 
-@Service
-@Transactional(readOnly = false)
-@RequiredArgsConstructor
-public class CommentService {
+public interface CommentService {
 
-    private final MemberRepository memberRepository;
-    private final CommentRepository commentRepository;
+    /**
+	 * 댓글 작성
+	 * @author ASW
+	 * @date 2023.09.11.
+	 */
+    public void addComment(Integer videoId, String content);
 
-    public void addComment(Integer videoId, String content){
+    /**
+	 * 댓글 조회
+	 * @author ASW
+	 * @date 2023.09.11.
+	 */
+    public List<CommentDto> getComments(Integer videoId);
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserCustom userDetails = (UserCustom)principal;
-        Integer memberCode = userDetails.getMemberCode();
-
-        Member member = memberRepository.findById(memberCode).get();
-
-        Date today = new Date();
-        Locale currentLocale = new Locale("KOREAN", "KOREA");
-        String pattern = "yyyy-MM-dd HH:mm:ss";
-        SimpleDateFormat formatter = new SimpleDateFormat(pattern, currentLocale);
-
-        Comment comment = Comment.builder()
-                .videoId(videoId)
-                .member(member)
-                .content(content)
-                .createdDt(formatter.format(today))
-                .build();
-
-        commentRepository.save(comment);
-    }
-
-    public List<CommentDto> getComments(Integer videoId){
-        List<Comment> comments = commentRepository.findAllByVideoIdOrderByCreatedDtAsc(videoId);
-        return comments.stream().map(c -> new CommentDto(c)).collect(Collectors.toList());
-    }
-
-    public void deleteComment(Integer commentId){
-        commentRepository.deleteById(commentId);
-    }
+    /**
+	 * 댓글 삭제
+	 * @author ASW
+	 * @date 2023.09.11.
+	 */
+    public void deleteComment(Integer commentId);
 }

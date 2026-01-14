@@ -1,6 +1,5 @@
 package com.sewoong.streaming.repository;
 
-import com.sewoong.streaming.domain.Member;
 import com.sewoong.streaming.domain.Video;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

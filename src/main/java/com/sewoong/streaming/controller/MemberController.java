@@ -139,7 +139,7 @@ public class MemberController {
     public ResponseEntity getUserInfo(){
         JSONObject resJobj = new JSONObject();
         try{
-            ChannelDto info = memberService.getUserInfo();
+            ChannelDto info = memberService.getMyChannelInfo();
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", info);
             return new ResponseEntity(resJobj, HttpStatus.OK);
@@ -176,7 +176,7 @@ public class MemberController {
     public ResponseEntity getChannelInfoByHandle(@PathVariable String handle){
         JSONObject resJobj = new JSONObject();
         try{
-            ChannelDto info = memberService.getMemberInfoByHandle(handle);
+            ChannelDto info = memberService.getChannelInfoByHandle(handle);
             info.setChannelSubscribeCount(subscribeService.getSubscribeCount(info.getChannelCode()));
             info.setIsSubscribe(subscribeService.checkSubscribe(info.getChannelCode()));
 
