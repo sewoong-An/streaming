@@ -4,8 +4,8 @@ module.exports = function (app) {
   app.use(
     ["/api", "/member"],
     createProxyMiddleware({
-      target: "https://vexel-sw.shop",
-      // target: "http://localhost:8080",
+      // target: "https://vexel-sw.shop",
+      target: "http://localhost:8081",
       changeOrigin: true,
     })
   );
