@@ -34,7 +34,45 @@
 
 ---
 
-## 🏗 Architecture & Technical Challenges
+## 🏗 Service Architecture (서비스 아키텍처)
+
+본 프로젝트는 대용량 미디어 처리와 실시간 피드백을 위해 다음과 같은 비동기 이벤트 기반 구조로 설계되었습니다.
+
+
+
+```mermaid
+graph TD
+    subgraph "Client Side"
+        A[Web Browser]
+    end
+
+    subgraph "Spring Boot Server"
+        B[API Controller]
+        C[Spring Security / JWT]
+        D[Async Video Service]
+        E[SSE Session Manager]
+    end
+
+    subgraph "External Tools & Storage"
+        F[FFmpeg / FFprobe]
+        G[Local/Cloud Storage]
+    end
+
+    subgraph "Database"
+        H[(MySQL)]
+    end
+
+    A -- "1. Video Upload (Multipart)" --> B
+    B -- "2. Auth Check" --> C
+    B -- "3. Start Async Process" --> D
+    D -- "4. Progress Tracking" --> E
+    E -- "5. Real-time Status (%)" --> A
+    D -- "6. Encode & Probe" --> F
+    F -- "7. Save Media Files" --> G
+    D -- "8. Metadata Save" --> H
+```
+
+## 🏗 Technical Challenges
 
 ### 1. Spring Boot 3.2+ 파라미터 바인딩 대응
 * **Challenge:** 최신 Spring Boot 환경에서 `-parameters` 옵션 미적용 시 `@PathVariable`, `@RequestParam` 이름 매핑이 유실되는 이슈 발생.
