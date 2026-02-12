@@ -17,62 +17,60 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/subscribe")
 public class SubscribeController {
-    public final SubscribeService subscribeService;
+
+    private final SubscribeService subscribeService;
 
     @PostMapping("/createSubscribe/{subChannelCode}")
-    public ResponseEntity createSubscribe(@PathVariable String subChannelCode){
+    public ResponseEntity<JSONObject> createSubscribe(@PathVariable("subChannelCode") String subChannelCode) {
         JSONObject resJobj = new JSONObject();
         try {
             subscribeService.createSubscribe(Integer.parseInt(subChannelCode));
             resJobj.put("status", "SUCCESS");
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping ("/deleteSubscribe/{subChannelCode}")
-    public ResponseEntity deleteSubscribe(@PathVariable String subChannelCode){
+    @DeleteMapping("/deleteSubscribe/{subChannelCode}")
+    public ResponseEntity<JSONObject> deleteSubscribe(@PathVariable("subChannelCode") String subChannelCode) {
         JSONObject resJobj = new JSONObject();
         try {
             subscribeService.deleteSubscribe(Integer.parseInt(subChannelCode));
             resJobj.put("status", "SUCCESS");
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getSubscribeCount/{subChannelCode}")
-    public ResponseEntity getSubscribeCount(@PathVariable String subChannelCode){
+    public ResponseEntity<JSONObject> getSubscribeCount(@PathVariable("subChannelCode") String subChannelCode) {
         JSONObject resJobj = new JSONObject();
         try {
             Integer count = subscribeService.getSubscribeCount(Integer.parseInt(subChannelCode));
             resJobj.put("status", "SUCCESS");
             resJobj.put("count", count);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/getSubscribeList")
-    public ResponseEntity getSubscribeList(){
+    public ResponseEntity<JSONObject> getSubscribeList() {
         JSONObject resJobj = new JSONObject();
         try {
             List<Subscribe> subList = subscribeService.getSubscribeList();
             JSONArray subJarr = new JSONArray();
 
-            for(Subscribe sub : subList){
+            for (Subscribe sub : subList) {
                 JSONObject subJobj = new JSONObject();
 
                 subJobj.put("channelCode", sub.getSubscribePK().getSubChannelCode());
@@ -85,28 +83,26 @@ public class SubscribeController {
 
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", subJarr);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/checkSubscribe/{subChannelCode}")
-    public ResponseEntity checkSubscribe(@PathVariable String subChannelCode){
+    public ResponseEntity<JSONObject> checkSubscribe(@PathVariable("subChannelCode") String subChannelCode) {
         JSONObject resJobj = new JSONObject();
         try {
             Boolean isSubscribe = subscribeService.checkSubscribe(Integer.parseInt(subChannelCode));
             resJobj.put("status", "SUCCESS");
             resJobj.put("isSubscribe", isSubscribe);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 }

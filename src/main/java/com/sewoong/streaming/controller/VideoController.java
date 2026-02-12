@@ -1,7 +1,6 @@
 package com.sewoong.streaming.controller;
 
 import com.sewoong.streaming.domain.Subscribe;
-
 import com.sewoong.streaming.dto.VideoDto;
 import com.sewoong.streaming.service.FileService;
 import com.sewoong.streaming.service.SubscribeService;
@@ -13,7 +12,6 @@ import net.bramp.ffmpeg.probe.FFmpegFormat;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,11 +30,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/video")
 public class VideoController {
-    @Autowired
+
     private final VideoService videoService;
-    @Autowired
     private final FileService fileService;
-    @Autowired
     private final SubscribeService subscribeService;
 
     @Value("${file.ffprobe.path}")
@@ -46,218 +42,197 @@ public class VideoController {
     private String tempPath;
 
     @GetMapping(value = "/sseConnect/{sseId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter sseConnect(@PathVariable String sseId) {
+    public SseEmitter sseConnect(@PathVariable("sseId") String sseId) {
         return fileService.sseConnect(sseId);
     }
 
-
     @PostMapping("/upload")
-    public ResponseEntity upload(@RequestParam("file")MultipartFile file, @RequestParam("sseId") String sseId){
+    public ResponseEntity<JSONObject> upload(@RequestParam("file") MultipartFile file,
+            @RequestParam("sseId") String sseId) {
         JSONObject resJobj = new JSONObject();
 
         try {
+            // 원본 비디오 임시 저장
             String originVideoPath = fileService.videoUpload(file);
 
             if (originVideoPath.equals("")) {
                 resJobj.put("status", "ERROR");
-                return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
             }
 
+            // AV1 코덱으로 변환 (인코딩) 진행
             String videoPath = fileService.saveAsAv1(originVideoPath, sseId);
-
+            // 비디오에서 첫 썸네일 추출
             String thumbnailPath = fileService.initialThumbnail(videoPath);
 
             if (thumbnailPath.equals("")) {
                 resJobj.put("status", "ERROR");
-                return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
             }
 
-            FFprobe ffprobe = new FFprobe(ffprobePath);  //리눅스에 설치되어 있는 ffmpeg 폴더
+            // FFprobe를 이용한 영상 분석 (재생 시간 추출)
+            FFprobe ffprobe = new FFprobe(ffprobePath);
             FFmpegProbeResult probeResult = ffprobe.probe(tempPath + videoPath);
             FFmpegFormat format = probeResult.getFormat();
             Integer runningTime = (int) format.duration;
 
+            // DB에 비디오 정보 저장
             Integer videoId = videoService.insertVideo(videoPath, thumbnailPath, runningTime);
+
             resJobj.put("status", "SUCCESS");
             resJobj.put("videoId", videoId);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            e.printStackTrace();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Video upload and encoding error: ", e);
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/uploadThumbnail")
-    public ResponseEntity uploadThumbnail(@RequestParam("file")MultipartFile file, @RequestParam("origin")String origin){
+    public ResponseEntity<JSONObject> uploadThumbnail(@RequestParam("file") MultipartFile file,
+            @RequestParam("origin") String origin) {
         JSONObject resJobj = new JSONObject();
-
         try {
             String thumbnailUrl = fileService.thumbnailUpload(file, origin);
             if (thumbnailUrl.equals("")) {
                 resJobj.put("status", "ERROR");
-                return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
             }
             resJobj.put("status", "SUCCESS");
             resJobj.put("thumbnailUrl", thumbnailUrl);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getMyVideos")
-    public ResponseEntity getMyVideos(){
+    public ResponseEntity<JSONObject> getMyVideos() {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             List<VideoDto> videoList = videoService.getMyVideos();
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", videoList);
-
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getVideos")
-    public ResponseEntity getVideos(@RequestParam @Nullable String searchQuery){
+    public ResponseEntity<JSONObject> getVideos(
+            @RequestParam(value = "searchQuery", required = false) @Nullable String searchQuery) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             List<VideoDto> videoList = videoService.getVideos(searchQuery);
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", videoList);
-
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getChannelVideos/{handle}")
-    public ResponseEntity getChannelVideos(@PathVariable String handle){
+    public ResponseEntity<JSONObject> getChannelVideos(@PathVariable("handle") String handle) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             List<VideoDto> videoList = videoService.getChannelVideos(handle);
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", videoList);
-
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getVideoInfo/{id}")
-    public ResponseEntity getVideoInfo(@PathVariable String id){
+    public ResponseEntity<JSONObject> getVideoInfo(@PathVariable("id") String id) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             VideoDto video = videoService.getVideoInfo(Integer.parseInt(id));
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", video);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/updateVideo/{id}")
-    public ResponseEntity updateVideo(@PathVariable String id, @RequestBody Map<String, Object> data){
+    public ResponseEntity<JSONObject> updateVideo(@PathVariable("id") String id,
+            @RequestBody Map<String, Object> data) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             videoService.updateVideo(Integer.parseInt(id), data);
-
             resJobj.put("status", "SUCCESS");
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/increaseViews/{id}")
-    public ResponseEntity increaseViews(@PathVariable String id){
+    public ResponseEntity<JSONObject> increaseViews(@PathVariable("id") String id) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             videoService.increaseViews(Integer.parseInt(id));
-
             resJobj.put("status", "SUCCESS");
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/getSubscribeVideos")
-    public ResponseEntity getSubscribeVideos(){
+    public ResponseEntity<JSONObject> getSubscribeVideos() {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             List<Subscribe> subscribes = subscribeService.getSubscribeList();
-
             List<VideoDto> videoList = videoService.getSubscribeVideos(subscribes);
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", videoList);
-
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/deleteVideos")
-    public ResponseEntity deleteVideos(@RequestBody Map<String, Object> data){
+    public ResponseEntity<JSONObject> deleteVideos(@RequestBody Map<String, Object> data) {
         JSONObject resJobj = new JSONObject();
         try {
-            List<Integer> ids = ((List<String>) data.get("videoIds")).stream()
-                    .map(id -> Integer.parseInt(id))
+            @SuppressWarnings("unchecked")
+            List<String> rawIds = (List<String>) data.get("videoIds");
+            List<Integer> ids = rawIds.stream()
+                    .map(Integer::parseInt)
                     .collect(Collectors.toList());
 
             videoService.deleteVideos(ids);
-
             resJobj.put("status", "SUCCESS");
-
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 }

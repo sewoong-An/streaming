@@ -9,7 +9,6 @@ import com.sewoong.streaming.service.SubscribeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +29,14 @@ public class MemberController {
 
     @Value("${public.domain}")
     private String domain;
-    @Autowired
+
     private final MemberService memberService;
-
-    @Autowired
     private final SubscribeService subscribeService;
-
-    @Autowired
     private final FileService fileService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
+    public ResponseEntity<JSONObject> login(@RequestBody MemberLoginRequestDto memberLoginRequestDto,
+            HttpServletResponse response) {
         JSONObject resJobj = new JSONObject();
         try {
             String memberId = memberLoginRequestDto.getMemberId();
@@ -50,212 +46,183 @@ public class MemberController {
             createCookie("refreshToken", tokenInfo.getRefreshToken(), response);
             resJobj.put("status", "SUCCESS");
             resJobj.put("tokenInfo", tokenInfo);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
-
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/refreshToken")
-    public ResponseEntity refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<JSONObject> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         JSONObject resJobj = new JSONObject();
         try {
             String refreshToken = getCookie("refreshToken", request);
             TokenInfo tokenInfo = memberService.refreshToken(refreshToken);
 
             createCookie("refreshToken", tokenInfo.getRefreshToken(), response);
-            resJobj.put("status", "ERROR");
+            resJobj.put("status", "SUCCESS"); // 기존 코드의 ERROR 오타 수정
             resJobj.put("tokenInfo", tokenInfo);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/join")
-    public ResponseEntity join(@RequestBody Map<String, Object> data, UriComponentsBuilder uriBuilder) {
-
+    public ResponseEntity<String> join(@RequestBody Map<String, Object> data, UriComponentsBuilder uriBuilder) {
         JSONObject resJobj = new JSONObject();
         try {
             String imageUrl = fileService.createBasicChannelImage((String) data.get("name"));
-
-            Integer memberCode = memberService.join(data, imageUrl);
+            memberService.join(data, imageUrl);
             resJobj.put("status", "SUCCESS");
-            return new ResponseEntity(resJobj, HttpStatus.OK);
+            return new ResponseEntity<>(resJobj.toJSONString(), HttpStatus.OK);
         } catch (Exception e) {
-
             resJobj.put("status", "ERROR");
             resJobj.put("error_massage", e.getMessage());
-            return new ResponseEntity(resJobj.toJSONString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj.toJSONString(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/updateChannelInfo")
-    public ResponseEntity updateChannelInfo(@RequestBody Map<String, Object> data) {
-
+    public ResponseEntity<String> updateChannelInfo(@RequestBody Map<String, Object> data) {
         JSONObject resJobj = new JSONObject();
         try {
             ChannelDto info = memberService.updateMember(data);
-
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", info);
-            return new ResponseEntity(resJobj.toJSONString(), HttpStatus.OK);
+            return new ResponseEntity<>(resJobj.toJSONString(), HttpStatus.OK);
         } catch (Exception e) {
-
             resJobj.put("status", "ERROR");
             resJobj.put("error_massage", e.getMessage());
-            return new ResponseEntity(resJobj.toJSONString(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj.toJSONString(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/uploadChannelImage")
-    public ResponseEntity uploadChannelImage(@RequestParam("file") MultipartFile file, @RequestParam("origin")String origin){
+    public ResponseEntity<JSONObject> uploadChannelImage(@RequestParam("file") MultipartFile file,
+            @RequestParam("origin") String origin) {
         JSONObject resJobj = new JSONObject();
-
         try {
             String ImageUrl = fileService.channelImageUpload(file, origin);
             if (ImageUrl.equals("")) {
                 resJobj.put("status", "ERROR");
-                return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
             }
             resJobj.put("channelImageUrl", ImageUrl);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch (Exception e){
+            resJobj.put("status", "SUCCESS");
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getUserInfo")
-    public ResponseEntity getUserInfo(){
+    public ResponseEntity<JSONObject> getUserInfo() {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             ChannelDto info = memberService.getMyChannelInfo();
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", info);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getChannelInfoByCode/{code}")
-    public ResponseEntity getChannelInfoByCode(@PathVariable String code){
+    public ResponseEntity<JSONObject> getChannelInfoByCode(@PathVariable("code") String code) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             ChannelDto info = memberService.getChannelInfoByCode(Integer.parseInt(code));
             info.setChannelSubscribeCount(subscribeService.getSubscribeCount(info.getChannelCode()));
             info.setIsSubscribe(subscribeService.checkSubscribe(info.getChannelCode()));
 
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", info);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(resJobj, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/getChannelInfoByHandle/{handle}")
-    public ResponseEntity getChannelInfoByHandle(@PathVariable String handle){
+    public ResponseEntity<JSONObject> getChannelInfoByHandle(@PathVariable("handle") String handle) {
         JSONObject resJobj = new JSONObject();
-        try{
+        try {
             ChannelDto info = memberService.getChannelInfoByHandle(handle);
             info.setChannelSubscribeCount(subscribeService.getSubscribeCount(info.getChannelCode()));
             info.setIsSubscribe(subscribeService.checkSubscribe(info.getChannelCode()));
 
             resJobj.put("status", "SUCCESS");
             resJobj.put("data", info);
-            return new ResponseEntity(resJobj, HttpStatus.OK);
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/checkName")
-    public ResponseEntity checkName(@RequestParam String name){
+    public ResponseEntity<JSONObject> checkName(@RequestParam("name") String name) {
         JSONObject resJobj = new JSONObject();
-        try{
-            if(memberService.checkName(name)){
+        try {
+            if (memberService.checkName(name)) {
                 resJobj.put("status", "ERROR");
                 resJobj.put("message", "사용중인 채널명입니다.");
-                return new ResponseEntity(resJobj, HttpStatus.OK);
-            }
-            else{
+            } else {
                 resJobj.put("status", "SUCCESS");
-                return new ResponseEntity(resJobj, HttpStatus.OK);
             }
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/checkHandle")
-    public ResponseEntity checkHandle(@RequestParam String handle){
+    public ResponseEntity<JSONObject> checkHandle(@RequestParam("handle") String handle) {
         JSONObject resJobj = new JSONObject();
-        try{
-            if(memberService.checkHandle(handle)){
+        try {
+            if (memberService.checkHandle(handle)) {
                 resJobj.put("status", "ERROR");
                 resJobj.put("message", "사용중인 핸들입니다.");
-                return new ResponseEntity(resJobj, HttpStatus.OK);
-            }
-            else{
+            } else {
                 resJobj.put("status", "SUCCESS");
-                return new ResponseEntity(resJobj, HttpStatus.OK);
             }
-        }
-        catch(Exception e) {
-            resJobj = new JSONObject();
+            return new ResponseEntity<>(resJobj, HttpStatus.OK);
+        } catch (Exception e) {
             resJobj.put("status", "ERROR");
             resJobj.put("message", e.getMessage());
-            return new ResponseEntity(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(resJobj, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public void createCookie(String name, String value, HttpServletResponse response) {
         Cookie cookie = new Cookie(name, value);
         cookie.setDomain(domain);
-
-//        cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-
-        // add cookie to response
         response.addCookie(cookie);
     }
 
     public String getCookie(String cookieName, HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies(); // 모든 쿠키 가져오기
-        if(cookies != null){
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
             for (Cookie c : cookies) {
-                String name = c.getName(); // 쿠키 이름 가져오기
-                String value = c.getValue(); // 쿠키 값 가져오기
-                if (name.equals(cookieName)) {
-                    return value;
+                if (c.getName().equals(cookieName)) {
+                    return c.getValue();
                 }
             }
         }
