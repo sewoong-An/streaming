@@ -41,46 +41,49 @@
 
 
 ```mermaid
-graph TD
+graph LR
     %% 사용자 영역
-    subgraph "사용자 (User)"
-        User((웹 브라우저))
+    User((fa:fa-users <br/> 사용자))
+
+    %% 서버 및 로직 영역
+    subgraph "Spring Boot Server (EC2)"
+        direction TB
+        Auth{fa:fa-lock <br/> JWT 인증}
+        API[fa:fa-gears <br/> API 컨트롤러]
+        Svc[fa:fa-video <br/> 비동기 서비스]
+        SSE[fa:fa-bell <br/> SSE 매니저]
     end
 
-    %% 서버 영역
-    subgraph "애플리케이션 서버 (Spring Boot)"
-        Auth{JWT 인증 필터}
-        Ctrl[API 컨트롤러]
-        Svc[비동기 비디오 서비스]
-        SSE[SSE 매니저]
+    %% 인프라 및 데이터 영역
+    subgraph "Infrastructure & Storage"
+        FF[[fa:fa-terminal <br/> FFmpeg/FFprobe]]
+        Storage[(fa:fa-hard-drive <br/> 파일 저장소)]
+        DB[(fa:fa-database <br/> MySQL)]
     end
 
-    %% 리소스 영역
-    subgraph "인프라 및 리소스"
-        FF[[FFmpeg / FFprobe]]
-        Storage[(파일 저장소)]
-        DB[(MySQL DB)]
-    end
+    %% 배포 라인
+    GitHub(fa:fa-github <br/> GitHub) -- "CI/CD (Push)" --> Actions(fa:fa-play-circle <br/> Actions)
+    Actions -- "Deploy" --> API
 
-    %% 흐름 연결 (강조선 사용)
-    User ==>|1. 비디오 업로드| Auth
-    Auth -->|2. 인증 완료| Ctrl
-    Ctrl -->|3. 비동기 작업 위임| Svc
+    %% 서비스 흐름
+    User -- "Request" --> Auth
+    Auth --> API
+    API --> Svc
+    Svc -. "실시간 알림 (%)" .-> User
     
-    Svc -.->|4. 진행률 업데이트| SSE
-    SSE -.->|5. 실시간 진행률 푸시 %| User
-    
-    Svc ==>|6. 인코딩 및 분석 시작| FF
-    FF --- |7. 결과물 저장| Storage
-    Svc --- |8. 메타데이터 기록| DB
+    Svc ==> FF
+    FF --- Storage
+    Svc --- DB
 
-    %% 스타일 설정 (명확한 대비)
-    style Auth fill:#ffffff,stroke:#ff00ff,stroke-width:2px,color:#000
-    style Svc fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
-    style SSE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000
-    style FF fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
-    style DB fill:#fffde7,stroke:#fbc02d,color:#000
-    style Storage fill:#fffde7,stroke:#fbc02d,color:#000
+    %% 스타일링 (색상 및 가독성)
+    style Auth fill:#fff0f6,stroke:#d40071,stroke-width:2px
+    style Svc fill:#e6f7ff,stroke:#0050b3,stroke-width:2px
+    style SSE fill:#f6ffed,stroke:#389e0d,stroke-width:2px
+    style FF fill:#fff7e6,stroke:#d46b08,stroke-width:2px
+    style DB fill:#fffbe6,stroke:#d4b106
+    style Storage fill:#fffbe6,stroke:#d4b106
+    style GitHub fill:#f5f5f5,stroke:#333
+    style Actions fill:#e6f4ff,stroke:#1677ff
 ```
 
 ## 🏗 기술적 도전 과제 및 해결
