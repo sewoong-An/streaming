@@ -41,35 +41,43 @@
 
 
 ```mermaid
-graph TD
-    subgraph "Client Side"
-        A[Web Browser]
+graph LR
+    subgraph "사용자 (User)"
+        Client((웹 브라우저))
     end
 
-    subgraph "Spring Boot Server"
-        B[API Controller]
-        C[Spring Security / JWT]
-        D[Async Video Service]
-        E[SSE Session Manager]
+    subgraph "애플리케이션 서버 (Spring Boot)"
+        Auth{인증 필터<br/>JWT}
+        Ctrl[API 컨트롤러]
+        Svc[비동기 비디오 서비스]
+        SSE[SSE 매니저]
     end
 
-    subgraph "External Tools & Storage"
-        F[FFmpeg / FFprobe]
-        G[Local/Cloud Storage]
+    subgraph "인프라 및 리소스"
+        FF[FFmpeg / FFprobe]
+        Storage[(파일 저장소)]
+        DB[(MySQL DB)]
     end
 
-    subgraph "Database"
-        H[(MySQL)]
-    end
+    %% 흐름 정의
+    Client -- "1. 비디오 업로드" --> Auth
+    Auth -- "2. 검증 완료" --> Ctrl
+    Ctrl -- "3. 비동기 작업 위임" --> Svc
+    
+    Svc -- "4. 진행률 업데이트" --> SSE
+    SSE -. "5. 실시간 푸시(%)" .-> Client
+    
+    Svc ==> FF
+    FF -- "6. 인코딩/분석" --> FF
+    FF -- "7. 결과물 저장" --> Storage
+    Svc -- "8. 메타데이터 기록" --> DB
 
-    A -- "1. Video Upload (Multipart)" --> B
-    B -- "2. Auth Check" --> C
-    B -- "3. Start Async Process" --> D
-    D -- "4. Progress Tracking" --> E
-    E -- "5. Real-time Status (%)" --> A
-    D -- "6. Encode & Probe" --> F
-    F -- "7. Save Media Files" --> G
-    D -- "8. Metadata Save" --> H
+    %% 스타일링
+    style Auth fill:#f9f,stroke:#333,stroke-width:2px
+    style Svc fill:#bbf,stroke:#333,stroke-width:2px
+    style SSE fill:#dfd,stroke:#333,stroke-width:2px
+    style Storage fill:#ffd,stroke:#333
+    style DB fill:#ffd,stroke:#333
 ```
 
 ## 🏗 기술적 도전 과제 및 해결
