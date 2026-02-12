@@ -43,4 +43,4 @@ file/video/*
 /node_modules/
 /src/main/resources/static/*
 
-application.properties
+/src/main/resources/application.properties
