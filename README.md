@@ -41,43 +41,46 @@
 
 
 ```mermaid
-graph LR
+graph TD
+    %% 사용자 영역
     subgraph "사용자 (User)"
-        Client((웹 브라우저))
+        User((웹 브라우저))
     end
 
+    %% 서버 영역
     subgraph "애플리케이션 서버 (Spring Boot)"
-        Auth{인증 필터<br/>JWT}
+        Auth{JWT 인증 필터}
         Ctrl[API 컨트롤러]
         Svc[비동기 비디오 서비스]
         SSE[SSE 매니저]
     end
 
+    %% 리소스 영역
     subgraph "인프라 및 리소스"
-        FF[FFmpeg / FFprobe]
+        FF[[FFmpeg / FFprobe]]
         Storage[(파일 저장소)]
         DB[(MySQL DB)]
     end
 
-    %% 흐름 정의
-    Client -- "1. 비디오 업로드" --> Auth
-    Auth -- "2. 검증 완료" --> Ctrl
-    Ctrl -- "3. 비동기 작업 위임" --> Svc
+    %% 흐름 연결 (강조선 사용)
+    User ==>|1. 비디오 업로드| Auth
+    Auth -->|2. 인증 완료| Ctrl
+    Ctrl -->|3. 비동기 작업 위임| Svc
     
-    Svc -- "4. 진행률 업데이트" --> SSE
-    SSE -. "5. 실시간 푸시(%)" .-> Client
+    Svc -.->|4. 진행률 업데이트| SSE
+    SSE -.->|5. 실시간 진행률 푸시 %| User
     
-    Svc ==> FF
-    FF -- "6. 인코딩/분석" --> FF
-    FF -- "7. 결과물 저장" --> Storage
-    Svc -- "8. 메타데이터 기록" --> DB
+    Svc ==>|6. 인코딩 및 분석 시작| FF
+    FF --- |7. 결과물 저장| Storage
+    Svc --- |8. 메타데이터 기록| DB
 
-    %% 스타일링
-    style Auth fill:#f9f,stroke:#333,stroke-width:2px
-    style Svc fill:#bbf,stroke:#333,stroke-width:2px
-    style SSE fill:#dfd,stroke:#333,stroke-width:2px
-    style Storage fill:#ffd,stroke:#333
-    style DB fill:#ffd,stroke:#333
+    %% 스타일 설정 (명확한 대비)
+    style Auth fill:#ffffff,stroke:#ff00ff,stroke-width:2px,color:#000
+    style Svc fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    style SSE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000
+    style FF fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    style DB fill:#fffde7,stroke:#fbc02d,color:#000
+    style Storage fill:#fffde7,stroke:#fbc02d,color:#000
 ```
 
 ## 🏗 기술적 도전 과제 및 해결
